@@ -1,0 +1,16 @@
+{
+  "name": "react-native-phpfox-image",
+  "version": "1.0.0",
+  "description": "Fast Image View support Avatar, Lazy Load, Queued Compoment Image View",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "keywords": [
+    "FastImage",
+    "phpFox",
+    "Avatar"
+  ],
+  "author": "ovalsky",
+  "license": "ISC"
+}
