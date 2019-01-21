@@ -10,6 +10,22 @@ class FastImage extends React.Component {
     this._root.setNativeProps(nativeProps);
   }
 
+  constructor (props) {
+    super(props);
+  }
+
+  shouldComponentUpdate ({ source }, nextState, nextContext) {
+    return (source.uri !== this.props.source.uri);
+  }
+
+  componentDidMount (): void {
+    this._componentMounted = true;
+  }
+
+  componentWillUnmount (): void {
+    this._componentMounted = false;
+  }
+
   captureRef = e => (this._root = e);
 
   render () {
@@ -28,18 +44,14 @@ class FastImage extends React.Component {
 
     const resolvedSource = Image.resolveAssetSource(source);
 
-    if (fallback) {
       return (
-        <View
-          style={ [styles.imageContainer, style] }
-          ref={ this.captureRef }
-        >
+      <View style={ [styles.imageContainer, style] } ref={ this.captureRef }>
           <Image
             { ...props }
             style={ StyleSheet.absoluteFill }
             source={ resolvedSource }
-            onLoadStart={ onLoadStart }
             onProgress={ onProgress }
+          onLoadStart={ onLoadStart }
             onLoad={ onLoad }
             onError={ onError }
             onLoadEnd={ onLoadEnd }
@@ -48,23 +60,6 @@ class FastImage extends React.Component {
         </View>
       );
     }
-
-    return (
-      <View style={ [styles.imageContainer, style] } ref={ this.captureRef }>
-        <Image
-          { ...props }
-          style={ StyleSheet.absoluteFill }
-          source={ resolvedSource }
-          onFastImageLoadStart={ onLoadStart }
-          onFastImageProgress={ onProgress }
-          onFastImageLoad={ onLoad }
-          onFastImageError={ onError }
-          onFastImageLoadEnd={ onLoadEnd }
-        />
-        { children }
-      </View>
-    );
-  }
 
   static resizeMode = {
     contain: "contain",
@@ -101,10 +96,11 @@ class FastImage extends React.Component {
     onLoadEnd: PropTypes.func,
     fallback: PropTypes.bool
   };
-}
+};
 
 const styles = StyleSheet.create({
   imageContainer: {
+    backgroundColor: "#DCDCDC",
     overflow: "hidden"
   }
 });
