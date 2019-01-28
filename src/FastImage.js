@@ -1,32 +1,48 @@
-import React from "react";
-import PropTypes from "prop-types";
-import { Image, StyleSheet, View, ViewPropTypes } from "react-native";
+import React from 'react'
+import PropTypes, { string } from 'prop-types'
+import { Image, StyleSheet, View, ViewPropTypes } from 'react-native'
 
 class FastImage extends React.Component {
 
-  _root;
+  _root
+
+  state = {
+    width: 0,
+    height: 0
+  }
 
   setNativeProps (nativeProps) {
-    this._root.setNativeProps(nativeProps);
+    this._root.setNativeProps(nativeProps)
   }
 
   constructor (props) {
-    super(props);
+    super(props)
   }
 
-  shouldComponentUpdate ({ source }, nextState, nextContext) {
-    return (source.uri !== this.props.source.uri);
+  shouldComponentUpdate ({ source, style }, nextState, nextContext) {
+    return (
+      source.uri !== this.props.source.uri
+        || nextState.width !== this.state.width
+        || nextState.height !== this.state.height
+    )
+  }
+
+  static getDerivedStateFromProps ({style}, prevState) {
+    return style ? {
+      width: style.width,
+      height: style.height
+    }:{}
   }
 
   componentDidMount (): void {
-    this._componentMounted = true;
+    this._componentMounted = true
   }
 
   componentWillUnmount (): void {
-    this._componentMounted = false;
+    this._componentMounted = false
   }
 
-  captureRef = e => (this._root = e);
+  captureRef = e => (this._root = e)
 
   render () {
     const {
@@ -40,51 +56,59 @@ class FastImage extends React.Component {
       children,
       fallback,
       ...props
-    } = this.props;
+    } = this.props
 
-    const resolvedSource = Image.resolveAssetSource(source);
+    const isEmpty = source.uri !== undefined && String(source.uri) == ''
 
-      return (
-      <View style={ [styles.imageContainer, style] } ref={ this.captureRef }>
-          <Image
-            { ...props }
-            style={ StyleSheet.absoluteFill }
-            source={ resolvedSource }
-            onProgress={ onProgress }
-          onLoadStart={ onLoadStart }
-            onLoad={ onLoad }
-            onError={ onError }
-            onLoadEnd={ onLoadEnd }
-          />
-          { children }
-        </View>
-      );
+    if (isEmpty) {
+      return (<View style={ [styles.imageContainer, style] } ref={ this.captureRef }>
+        { children }
+      </View>)
     }
 
+    const resolvedSource = Image.resolveAssetSource(source)
+
+    return (
+      <View style={ [styles.imageContainer, style] } ref={ this.captureRef }>
+        <Image
+          { ...props }
+          style={ StyleSheet.absoluteFill }
+          source={ resolvedSource }
+          onProgress={ onProgress }
+          onLoadStart={ onLoadStart }
+          onLoad={ onLoad }
+          onError={ onError }
+          onLoadEnd={ onLoadEnd }
+        />
+        { children }
+      </View>
+    )
+  }
+
   static resizeMode = {
-    contain: "contain",
-    cover: "cover",
-    stretch: "stretch",
-    center: "center"
-  };
+    contain: 'contain',
+    cover: 'cover',
+    stretch: 'stretch',
+    center: 'center'
+  }
 
   static priority = {
     // lower than usual.
-    low: "low",
+    low: 'low',
     // normal, the default.
-    normal: "normal",
+    normal: 'normal',
     // higher than usual.
-    high: "high"
-  };
+    high: 'high'
+  }
 
   static prefetch = sources => {
-    Image.prefetch(sources);
-  };
+    Image.prefetch(sources)
+  }
 
   static defaultProps = {
-    resizeMode: "cover",
+    resizeMode: 'cover',
     fadeDuration: 300
-  };
+  }
 
   static propTypes = {
     ...ViewPropTypes,
@@ -95,16 +119,16 @@ class FastImage extends React.Component {
     onError: PropTypes.func,
     onLoadEnd: PropTypes.func,
     fallback: PropTypes.bool
-  };
-};
+  }
+}
 
 const styles = StyleSheet.create({
   imageContainer: {
-    backgroundColor: "#DCDCDC",
-    overflow: "hidden"
+    backgroundColor: '#DCDCDC',
+    overflow: 'hidden'
   }
-});
+})
 
 module.exports = {
   FastImage
-};
+}
