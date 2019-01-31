@@ -22,6 +22,7 @@ class FastImage extends React.Component {
   shouldComponentUpdate ({ source, style }, nextState, nextContext) {
     return (
       source.uri !== this.props.source.uri
+        || style !== this.props.style
         || nextState.width !== this.state.width
         || nextState.height !== this.state.height
     )
