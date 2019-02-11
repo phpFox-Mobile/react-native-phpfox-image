@@ -93,7 +93,7 @@ class FastImage extends React.Component {
 
   static propTypes = {
     ...ViewPropTypes,
-    source: PropTypes.any
+    source: PropTypes.any,
     onLoadStart: PropTypes.func,
     onProgress: PropTypes.func,
     onLoad: PropTypes.func,
