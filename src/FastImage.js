@@ -15,10 +15,6 @@ class FastImage extends React.Component {
     this._root.setNativeProps(nativeProps)
   }
 
-  constructor (props) {
-    super(props)
-  }
-
   shouldComponentUpdate ({ source, style }, nextState, nextContext) {
     return (
       source.uri !== this.props.source.uri
