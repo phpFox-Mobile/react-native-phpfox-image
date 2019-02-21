@@ -1,8 +1,8 @@
 import React from 'react'
-import PropTypes, { string } from 'prop-types'
-import { Image, StyleSheet, View, ViewPropTypes } from 'react-native'
+import { Image, StyleSheet, View } from 'react-native'
+import type { ImageProps, ImageState } from './inc'
 
-class FastImage extends React.Component {
+export class FastImage extends React.Component<ImageProps, ImageState> {
 
   _root
 
@@ -11,6 +11,8 @@ class FastImage extends React.Component {
     height: 0
   }
 
+  _componentMounted: Boolean = false
+
   setNativeProps (nativeProps) {
     this._root.setNativeProps(nativeProps)
   }
@@ -18,17 +20,25 @@ class FastImage extends React.Component {
   shouldComponentUpdate ({ source, style }, nextState, nextContext) {
     return (
       source.uri !== this.props.source.uri
-        || style !== this.props.style
-        || nextState.width !== this.state.width
-        || nextState.height !== this.state.height
+      || style !== this.props.style
+      || nextState.width !== this.state.width
+      || nextState.height !== this.state.height
     )
   }
 
-  static getDerivedStateFromProps ({style}, prevState) {
+  componentDidMount (): void {
+    this._componentMounted = true
+  }
+
+  componentWillUnmount (): void {
+    this._componentMounted = false
+  }
+
+  static getDerivedStateFromProps ({ style }, prevState) {
     return style ? {
       width: style.width,
       height: style.height
-    }:{}
+    } : {}
   }
 
   componentDidMount (): void {
@@ -106,17 +116,6 @@ class FastImage extends React.Component {
     resizeMode: 'cover',
     fadeDuration: 300
   }
-
-  static propTypes = {
-    ...ViewPropTypes,
-    source: PropTypes.any,
-    onLoadStart: PropTypes.func,
-    onProgress: PropTypes.func,
-    onLoad: PropTypes.func,
-    onError: PropTypes.func,
-    onLoadEnd: PropTypes.func,
-    fallback: PropTypes.bool
-  }
 }
 
 const styles = StyleSheet.create({
@@ -125,7 +124,3 @@ const styles = StyleSheet.create({
     overflow: 'hidden'
   }
 })
-
-module.exports = {
-  FastImage
-}

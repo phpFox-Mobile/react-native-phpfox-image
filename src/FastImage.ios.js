@@ -1,20 +1,12 @@
-import React, { Component } from 'react'
+import React from 'react'
 import { Image, NativeModules, requireNativeComponent, StyleSheet, View } from 'react-native'
+import type { ImageProps, ImageState } from './inc'
 
 const FastImageViewNativeModule = NativeModules.FastImageView
 
-export class FastImage extends Component<{
-  source: { uri: String, headers?: Object, priority?: String },
-  onLoadStart: Function,
-  onProgress: Function,
-  onLoad: Function,
-  onError: Function,
-  onLoadEnd: Function,
-  fallback: Function
-}, {
-  width: Number,
-  height: Number
-}> {
+export class FastImage extends React.Component<ImageProps, ImageState> {
+
+  _root
 
   state = {
     width: 0,
@@ -51,7 +43,15 @@ export class FastImage extends Component<{
     } : {}
   }
 
-  captureRef = ref => (this._root = ref)
+  componentDidMount (): void {
+    this._componentMounted = true
+  }
+
+  componentWillUnmount (): void {
+    this._componentMounted = false
+  }
+
+  captureRef = e => (this._root = e)
 
   render () {
     const {
@@ -67,40 +67,27 @@ export class FastImage extends Component<{
       ...props
     } = this.props
 
-    const resolvedSource = Image.resolveAssetSource(source)
+    const isEmpty = source.uri !== undefined && String(source.uri) == ''
 
-    if (fallback) {
-      return (
-        <View
-          style={ [styles.imageContainer, style] }
-          ref={ this.captureRef }
-        >
-          <FastImageView
-            { ...props }
-            style={ StyleSheet.absoluteFill }
-            source={ resolvedSource }
-            onLoadStart={ onLoadStart }
-            onProgress={ onProgress }
-            onLoad={ onLoad }
-            onError={ onError }
-            onLoadEnd={ onLoadEnd }
-          />
-          { children }
-        </View>
-      )
+    if (isEmpty) {
+      return (<View style={ [styles.imageContainer, style] } ref={ this.captureRef }>
+        { children }
+      </View>)
     }
+
+    const resolvedSource = Image.resolveAssetSource(source)
 
     return (
       <View style={ [styles.imageContainer, style] } ref={ this.captureRef }>
-        <FastImageView
+        <Image
           { ...props }
           style={ StyleSheet.absoluteFill }
           source={ resolvedSource }
-          onFastImageLoadStart={ onLoadStart }
-          onFastImageProgress={ onProgress }
-          onFastImageLoad={ onLoad }
-          onFastImageError={ onError }
-          onFastImageLoadEnd={ onLoadEnd }
+          onProgress={ onProgress }
+          onLoadStart={ onLoadStart }
+          onLoad={ onLoad }
+          onError={ onError }
+          onLoadEnd={ onLoadEnd }
         />
         { children }
       </View>
@@ -123,21 +110,13 @@ export class FastImage extends Component<{
     high: 'high'
   }
 
-  static cacheControl = {
-    // Ignore headers, use uri as cache key, fetch only if not in cache.
-    immutable: 'immutable',
-    // Respect http headers, no aggressive caching.
-    web: 'web',
-    // Only load from cache.
-    cacheOnly: 'cacheOnly'
-  }
-
-  static preload = sources => {
-    FastImageViewNativeModule.preload(sources)
+  static prefetch = sources => {
+    Image.prefetch(sources)
   }
 
   static defaultProps = {
-    resizeMode: FastImage.resizeMode.cover
+    resizeMode: 'cover',
+    fadeDuration: 300
   }
 }
 
