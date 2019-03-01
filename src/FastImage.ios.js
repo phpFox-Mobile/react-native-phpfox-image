@@ -10,7 +10,8 @@ export class FastImage extends React.Component<ImageProps, ImageState> {
 
   state = {
     width: 0,
-    height: 0
+    height: 0,
+    aspectRatio: 0
   }
 
   _componentMounted: Boolean = false
@@ -21,9 +22,9 @@ export class FastImage extends React.Component<ImageProps, ImageState> {
 
   shouldComponentUpdate ({ source, style }, nextState, nextContext) {
     return (
-      source.uri !== this.props.source.uri
-      || style !== this.props.style
+      (source && source.uri !== this.props.source.uri)
       || nextState.width !== this.state.width
+      || nextState.aspectRatio !== this.state.aspectRatio
       || nextState.height !== this.state.height
     )
   }
@@ -51,6 +52,16 @@ export class FastImage extends React.Component<ImageProps, ImageState> {
     this._componentMounted = false
   }
 
+  onLoaded = (evt) => {
+    const { width, height } = evt.nativeEvent.source
+
+    if (this._componentMounted && width && height) {
+      this.setState({
+        aspectRatio: width / height
+      })
+    }
+  }
+
   captureRef = e => (this._root = e)
 
   render () {
@@ -61,7 +72,7 @@ export class FastImage extends React.Component<ImageProps, ImageState> {
       onLoad,
       onError,
       onLoadEnd,
-      style,
+      style = {},
       children,
       fallback,
       ...props
@@ -75,17 +86,29 @@ export class FastImage extends React.Component<ImageProps, ImageState> {
       </View>)
     }
 
+    const autoHeight = this.props.autoHeight
+
     const resolvedSource = Image.resolveAssetSource(source)
 
+    const ratio = {}
+
+    if (autoHeight) {
+      if (this.state.aspectRatio) {
+        ratio.aspectRatio = this.state.aspectRatio
+      } else {
+        ratio.aspectRatio = 1
+      }
+    }
+
     return (
-      <View style={ [styles.imageContainer, style] } ref={ this.captureRef }>
+      <View style={ [styles.imageContainer, style, ratio] } ref={ this.captureRef }>
         <Image
           { ...props }
           style={ StyleSheet.absoluteFill }
           source={ resolvedSource }
           onProgress={ onProgress }
           onLoadStart={ onLoadStart }
-          onLoad={ onLoad }
+          onLoad={ (autoHeight && !this.state.aspectRatio) ? this.onLoaded : onLoad }
           onError={ onError }
           onLoadEnd={ onLoadEnd }
         />
