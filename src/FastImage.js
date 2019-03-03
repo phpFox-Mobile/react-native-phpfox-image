@@ -55,7 +55,8 @@ export class FastImage extends React.Component<ImageProps, ImageState> {
 
     if (this._componentMounted && width && height) {
       this.setState({
-        aspectRatio: width / height
+        aspectRatio: Math.min(Math.max(width / height, this.props.maxAspectRatio),
+          this.props.minAspectRatio)
       })
     }
   }
@@ -137,7 +138,9 @@ export class FastImage extends React.Component<ImageProps, ImageState> {
 
   static defaultProps = {
     resizeMode: 'cover',
-    fadeDuration: 300
+    fadeDuration: 300,
+    maxAspectRatio: 1.25,
+    minAspectRatio: 0.25
   }
 }
 
