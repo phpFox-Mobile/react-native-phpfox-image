@@ -7,11 +7,11 @@ export type ImageProps = {
   onProgress?: ()=>void,
   onLoad?: ()=>void,
   onError?: ()=>void,
-  onLoadEnd: ()=>void,
-  fallback: ()=>void,
-  autoHeight: Number,
-  maxRatio: 1.25,
-  minRatio: 0.25
+  onLoadEnd?: ()=>void,
+  fallback?: ()=>void,
+  autoHeight?: Number,
+  maxRatio?: Number,
+  minRatio?: Number
 }
 export type  ImageState = {
   width: Number,
