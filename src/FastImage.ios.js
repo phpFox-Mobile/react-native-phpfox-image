@@ -1,6 +1,6 @@
 import React from 'react'
 import { Image, NativeModules, requireNativeComponent, StyleSheet, View } from 'react-native'
-import type { ImageProps, ImageState } from './inc'
+import type { ImageProps,ImageDefaultProps, ImageState } from './inc'
 
 const FastImageViewNativeModule = NativeModules.FastImageView
 

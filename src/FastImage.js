@@ -1,6 +1,6 @@
 import React from 'react'
 import { Image, StyleSheet, View } from 'react-native'
-import type { ImageProps, ImageState } from './inc'
+import type { ImageProps, ImageDefaultProps, ImageState } from './inc'
 
 export class FastImage extends React.Component<ImageProps, ImageState> {
 
