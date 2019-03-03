@@ -17,3 +17,10 @@ export type  ImageState = {
   width: Number,
   height: Number
 }
+
+export const ImageDefaultProps = {
+  resizeMode: 'cover',
+  fadeDuration: 300,
+  maxRatio: 16 / 9,
+  minRatio: 9 / 16
+}

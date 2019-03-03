@@ -138,12 +138,7 @@ export class FastImage extends React.Component<ImageProps, ImageState> {
     Image.prefetch(sources)
   }
 
-  static defaultProps = {
-    resizeMode: 'cover',
-    fadeDuration: 300,
-    maxRatio: 1.25,
-    minRatio: 0.25
-  }
+  static defaultProps = ImageDefaultProps
 }
 
 const styles = StyleSheet.create({
