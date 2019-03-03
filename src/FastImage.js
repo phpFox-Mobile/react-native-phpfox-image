@@ -55,7 +55,7 @@ export class FastImage extends React.Component<ImageProps, ImageState> {
 
     if (this._componentMounted && width && height) {
       this.setState({
-        aspectRatio: Math.min(Math.max(width / height, this.props.maxRatio),
+        aspectRatio: Math.max(Math.min(width / height, this.props.maxRatio),
           this.props.minRatio)
       })
     }
