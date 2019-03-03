@@ -10,8 +10,8 @@ export type ImageProps = {
   onLoadEnd: ()=>void,
   fallback: ()=>void,
   autoHeight: Number,
-  maxAspectRatio: 1.25,
-  minAspectRatio: 0.25
+  maxRatio: 1.25,
+  minRatio: 0.25
 }
 export type  ImageState = {
   width: Number,
