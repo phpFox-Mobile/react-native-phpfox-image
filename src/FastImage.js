@@ -10,7 +10,8 @@ export class FastImage extends React.Component<ImageProps, ImageState> {
   state = {
     width: 0,
     height: 0,
-    aspectRatio: 0
+    aspectRatio: 0,
+    error: false
   }
 
   _componentMounted: Boolean = false
@@ -25,6 +26,7 @@ export class FastImage extends React.Component<ImageProps, ImageState> {
       || nextState.width !== this.state.width
       || nextState.aspectRatio !== this.state.aspectRatio
       || nextState.height !== this.state.height
+      || nextState.error !== this.state.error
     )
   }
 
@@ -62,6 +64,14 @@ export class FastImage extends React.Component<ImageProps, ImageState> {
     }
   }
 
+  onErrorHandled = (e) => {
+    this.setState({ error: true })
+
+    if (this.props.onError) {
+      onError(e)
+    }
+  }
+
   captureRef = e => (this._root = e)
 
   render () {
@@ -70,13 +80,17 @@ export class FastImage extends React.Component<ImageProps, ImageState> {
       onLoadStart,
       onProgress,
       onLoad,
-      onError,
       onLoadEnd,
       style = {},
       children,
       fallback,
+      onErrorRender,
       ...props
     } = this.props
+
+    if (this.state.error && onErrorRender) {
+      return onErrorRender()
+    }
 
     const isEmpty = source.uri !== undefined && String(source.uri) == ''
 
@@ -109,7 +123,7 @@ export class FastImage extends React.Component<ImageProps, ImageState> {
           onProgress={ onProgress }
           onLoadStart={ onLoadStart }
           onLoad={ (autoHeight && !this.state.aspectRatio) ? this.onLoaded : onLoad }
-          onError={ onError }
+          onError={ this.onErrorHandled }
           onLoadEnd={ onLoadEnd }
         />
         { children }
