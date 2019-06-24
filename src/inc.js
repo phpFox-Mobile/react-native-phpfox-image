@@ -24,5 +24,6 @@ export const ImageDefaultProps = {
   fadeDuration: 300,
   maxRatio: 16 / 9,
   minRatio: 9 / 16,
-  onErrorRender: () => null
+  onErrorRender: () => null,
+  themeStyle: {}
 }
