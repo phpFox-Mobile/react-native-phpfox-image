@@ -85,6 +85,7 @@ export class FastImage extends React.Component<ImageProps, ImageState> {
       children,
       fallback,
       onErrorRender,
+      themeStyle,
       ...props
     } = this.props
 
@@ -95,7 +96,8 @@ export class FastImage extends React.Component<ImageProps, ImageState> {
     const isEmpty = source.uri !== undefined && String(source.uri) == ''
 
     if (isEmpty) {
-      return (<View style={ [styles.imageContainer, style] } ref={ this.captureRef }>
+      return (<View style={ [styles.imageContainer, themeStyle, style] }
+                    ref={ this.captureRef }>
         { children }
       </View>)
     }
@@ -115,7 +117,8 @@ export class FastImage extends React.Component<ImageProps, ImageState> {
     }
 
     return (
-      <View style={ [styles.imageContainer, style, ratio] } ref={ this.captureRef }>
+      <View style={ [styles.imageContainer, themeStyle, style, ratio] }
+            ref={ this.captureRef }>
         <Image
           { ...props }
           style={ StyleSheet.absoluteFill }
@@ -151,7 +154,10 @@ export class FastImage extends React.Component<ImageProps, ImageState> {
     Image.prefetch(sources)
   }
 
-  static defaultProps = ImageDefaultProps
+  static defaultProps = {
+    ...ImageDefaultProps,
+    themeStyle: {}
+  }
 }
 
 const styles = StyleSheet.create({
