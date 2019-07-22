@@ -10,7 +10,7 @@ export class FastImage extends React.Component<ImageProps, ImageState> {
   state = {
     width: 0,
     height: 0,
-    aspectRatio: 0,
+    aspectRatio: 1,
     error: false
   }
 
@@ -20,11 +20,11 @@ export class FastImage extends React.Component<ImageProps, ImageState> {
     this._root.setNativeProps(nativeProps)
   }
 
-  shouldComponentUpdate ({ source, style }, nextState, nextContext) {
+  shouldComponentUpdate ({ source, style, autoHeight }, nextState, nextContext) {
     return (
       (source && source.uri !== this.props.source.uri)
       || nextState.width !== this.state.width
-      || nextState.aspectRatio !== this.state.aspectRatio
+      || (autoHeight && nextState.aspectRatio !== this.state.aspectRatio)
       || nextState.height !== this.state.height
       || nextState.error !== this.state.error
     )
