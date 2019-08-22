@@ -12,7 +12,7 @@ export class FastImage extends React.Component<ImageProps, ImageState> {
   state = {
     width: 0,
     height: 0,
-    aspectRatio: 1,
+    aspectRatio: 0,
     error: false
   }
 
