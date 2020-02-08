@@ -86,6 +86,7 @@ export class FastImage extends React.Component<ImageProps, ImageState> {
       fallback,
       onErrorRender,
       themeStyle,
+      imageStyle,
       ...props
     } = this.props
 
@@ -121,7 +122,7 @@ export class FastImage extends React.Component<ImageProps, ImageState> {
             ref={ this.captureRef }>
         <Image
           { ...props }
-          style={ StyleSheet.absoluteFill }
+          style={[ styles.image, imageStyle ]}
           source={ resolvedSource }
           onProgress={ onProgress }
           onLoadStart={ onLoadStart }
@@ -156,7 +157,10 @@ export class FastImage extends React.Component<ImageProps, ImageState> {
 
   static defaultProps = {
     ...ImageDefaultProps,
-    themeStyle: {}
+    themeStyle: {
+      backgroundColor: '#DCDCDC'
+    },
+    imageStyle: {}
   }
 }
 
@@ -164,5 +168,6 @@ const styles = StyleSheet.create({
   imageContainer: {
     backgroundColor: '#DCDCDC',
     overflow: 'hidden'
-  }
+  },
+  image: { ...StyleSheet.absoluteFill }
 })
