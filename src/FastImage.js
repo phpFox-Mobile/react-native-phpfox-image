@@ -68,7 +68,7 @@ export class FastImage extends React.Component<ImageProps, ImageState> {
     this.setState({ error: true })
 
     if (this.props.onError) {
-      onError(e)
+      this.props.onError(e)
     }
   }
 
