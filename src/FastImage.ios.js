@@ -1,9 +1,7 @@
 import React from 'react'
-import { Image, NativeModules, requireNativeComponent, StyleSheet, View } from 'react-native'
+import { Image, StyleSheet, View } from 'react-native'
 import type { ImageProps, ImageState } from './inc'
 import {ImageDefaultProps} from './inc'
-
-const FastImageViewNativeModule = NativeModules.FastImageView
 
 export class FastImage extends React.Component<ImageProps, ImageState> {
 
@@ -173,14 +171,4 @@ const styles = StyleSheet.create({
     overflow: 'hidden'
   },
   image: { ...StyleSheet.absoluteFill }
-})
-
-const FastImageView = requireNativeComponent('FastImageView', FastImage, {
-  nativeOnly: {
-    onFastImageLoadStart: true,
-    onFastImageProgress: true,
-    onFastImageLoad: true,
-    onFastImageError: true,
-    onFastImageLoadEnd: true
-  }
 })
