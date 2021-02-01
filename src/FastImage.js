@@ -5,31 +5,35 @@ import { ImageDefaultProps } from './inc'
 
 const RATIO_DECIMAL_PLACES = 2
 
+const getValidRatio = (value, max, min) => parseFloat(
+  Math.max(Math.min(value, max), min).toFixed(RATIO_DECIMAL_PLACES)
+)
+
 const computeRatioFromPropsAndState = (props, state) => {
-  const { autoHeight, aspectRatio: ratioProp, style = {} } = props
+  const { autoHeight, aspectRatio: ratioProp, style = {}, minRatio, maxRatio } = props
   const { aspectRatio: ratioState } = state
 
   let computedRatio = 0
 
   // Ratio priority from less -> important
 
-  // 1. style
-  if (style?.width && style?.height) {
-    computedRatio = parseFloat((style.width / style.height).toFixed(RATIO_DECIMAL_PLACES))
-  } else {
-    computedRatio = 0
-  }
-
-  // 2. prop
+  // 1. prop
   if (ratioProp) {
-    computedRatio = parseFloat(ratioProp.toFixed(RATIO_DECIMAL_PLACES))
+    computedRatio = getValidRatio(ratioProp, maxRatio, minRatio)
   }
 
-  // 3. state
+  // 2. state
   if (autoHeight && ratioState) {
-    computedRatio = parseFloat(ratioState.toFixed(RATIO_DECIMAL_PLACES))
+    computedRatio = getValidRatio(ratioState, maxRatio, minRatio)
   } else if (autoHeight && !ratioState && !computedRatio) {
     computedRatio = 1.000
+  }
+
+  // 3. style
+  if (style?.width && style?.height) {
+    computedRatio = getValidRatio(style.width / style.height, maxRatio, minRatio)
+  } else if ((!style?.width || !style?.height) && !computedRatio)  {
+    computedRatio = 0
   }
 
   return computedRatio
@@ -50,7 +54,7 @@ export class FastImage extends React.Component<ImageProps, ImageState> {
     this._root.setNativeProps(nativeProps)
   }
 
-  get resovledResource() {
+  get resolvedResource() {
     const { source } = this.props
 
     return Image.resolveAssetSource(source)
@@ -102,7 +106,7 @@ export class FastImage extends React.Component<ImageProps, ImageState> {
       const { width, height } = evt?.nativeEvent?.source
 
       if (this._componentMounted && width && height) {
-        const newAspectRatio = Math.max(Math.min(width / height, maxRatio), minRatio)
+        const newAspectRatio = getValidRatio(width / height, maxRatio, minRatio)
 
         this.setState({ aspectRatio: newAspectRatio })
       }
@@ -172,7 +176,7 @@ export class FastImage extends React.Component<ImageProps, ImageState> {
           onLoadStart={ onLoadStart }
           onError={ this.handledError }
           onLoad={ this.handledLoaded }
-          source={ this.resovledResource }
+          source={ this.resolvedResource }
           style={[ styles.image, imageStyle ]}
         />
         { children }
