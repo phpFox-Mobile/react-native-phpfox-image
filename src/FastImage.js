@@ -3,15 +3,45 @@ import { Image, StyleSheet, View } from 'react-native'
 import type { ImageProps, ImageState } from './inc'
 import { ImageDefaultProps } from './inc'
 
+const RATIO_DECIMAL_PLACES = 2
+
+const computeRatioFromPropsAndState = (props, state) => {
+  const { autoHeight, aspectRatio: ratioProp, style = {} } = props
+  const { aspectRatio: ratioState } = state
+
+  let computedRatio = 0
+
+  // Ratio priority from less -> important
+
+  // 1. style
+  if (style?.width && style?.height) {
+    computedRatio = parseFloat((style.width / style.height).toFixed(RATIO_DECIMAL_PLACES))
+  } else {
+    computedRatio = 0
+  }
+
+  // 2. prop
+  if (ratioProp) {
+    computedRatio = parseFloat(ratioProp.toFixed(RATIO_DECIMAL_PLACES))
+  }
+
+  // 3. state
+  if (autoHeight && ratioState) {
+    computedRatio = parseFloat(ratioState.toFixed(RATIO_DECIMAL_PLACES))
+  } else if (autoHeight && !ratioState && !computedRatio) {
+    computedRatio = 1.000
+  }
+
+  return computedRatio
+}
+
 export class FastImage extends React.Component<ImageProps, ImageState> {
 
   _root
 
   state = {
-    width: 0,
-    height: 0,
+    error: false,
     aspectRatio: 0,
-    error: false
   }
 
   _componentMounted: Boolean = false
@@ -20,14 +50,40 @@ export class FastImage extends React.Component<ImageProps, ImageState> {
     this._root.setNativeProps(nativeProps)
   }
 
-  shouldComponentUpdate ({ source, style, autoHeight }, nextState, nextContext) {
-    return (
-      (source && source.uri !== this.props.source.uri)
-      || nextState.width !== this.state.width
-      || (autoHeight && nextState.aspectRatio !== this.state.aspectRatio)
-      || nextState.height !== this.state.height
-      || nextState.error !== this.state.error
+  get resovledResource() {
+    const { source } = this.props
+
+    return Image.resolveAssetSource(source)
+  }
+
+  get computedRatioStyle() {
+    const computeRatio = computeRatioFromPropsAndState(this.props, this.state)
+
+    return computeRatio ? { aspectRatio: computeRatio } : {}
+  }
+
+  shouldComponentUpdate (nextProps, nextState, nextContext) {
+    const { error } = this.state
+    const { source, style } = this.props
+
+    const { source: nextSource, style: nextStyle } = nextProps
+
+    const aspectRatio = computeRatioFromPropsAndState(this.props, this.state)
+    const newAspectRatio = computeRatioFromPropsAndState(nextProps, nextState)
+
+    const result = (
+      style?.height !== nextStyle.height ||
+      style?.width !== nextStyle.width ||
+      source?.uri !== nextSource?.uri ||
+      aspectRatio !== newAspectRatio ||
+      nextState.error !== error
     )
+
+    // if (result) {
+    //   console.log({ aspectRatio, newAspectRatio })
+    // }
+
+    return result
   }
 
   componentDidMount (): void {
@@ -38,97 +94,83 @@ export class FastImage extends React.Component<ImageProps, ImageState> {
     this._componentMounted = false
   }
 
-  static getDerivedStateFromProps ({ style }, prevState) {
-    return style ? {
-      width: style.width,
-      height: style.height
-    } : {}
-  }
+  handledLoaded = evt => {
+    const { autoHeight, maxRatio, minRatio, onLoad = null } = this.props
+    const { aspectRatio = 0 } = this.state
 
-  componentDidMount (): void {
-    this._componentMounted = true
-  }
+    if (autoHeight && !aspectRatio) {
+      const { width, height } = evt?.nativeEvent?.source
 
-  componentWillUnmount (): void {
-    this._componentMounted = false
-  }
+      if (this._componentMounted && width && height) {
+        const newAspectRatio = Math.max(Math.min(width / height, maxRatio), minRatio)
 
-  onLoaded = (evt) => {
-    const { width, height } = evt.nativeEvent.source
-
-    if (this._componentMounted && width && height) {
-      this.setState({
-        aspectRatio: Math.max(Math.min(width / height, this.props.maxRatio),
-          this.props.minRatio)
-      })
+        this.setState({ aspectRatio: newAspectRatio })
+      }
+    } else if (onLoad) {
+      onLoad(evt)
     }
   }
 
-  onErrorHandled = (e) => {
+  handledError = e => {
+    const { onError = null } = this.props
+
     this.setState({ error: true })
 
-    if (this.props.onError) {
-      this.props.onError(e)
+    if (onError) {
+      onError(e)
     }
   }
 
-  captureRef = e => (this._root = e)
+  captureRef = e => {
+    this._root = e
+  }
 
   render () {
     const {
       source,
-      onLoadStart,
       onProgress,
-      onLoad,
-      onLoadEnd,
-      style = {},
-      children,
-      fallback,
       onErrorRender,
-      themeStyle,
-      imageStyle,
+      children, fallback,
+      autoHeight, style = {},
+      themeStyle, imageStyle,
+      onLoad, onLoadEnd, onLoadStart,
       ...props
     } = this.props
 
-    if (this.state.error && onErrorRender) {
+    const { error } = this.state
+
+    if (error && onErrorRender) {
       return onErrorRender()
     }
 
-    const isEmpty = source.uri !== undefined && String(source.uri) == ''
+    const isEmpty = source.uri !== undefined
+      && String(source.uri) == ''
 
     if (isEmpty) {
-      return (<View style={ [styles.imageContainer, themeStyle, style] }
-                    ref={ this.captureRef }>
-        { children }
-      </View>)
-    }
-
-    const autoHeight = this.props.autoHeight
-
-    const resolvedSource = Image.resolveAssetSource(source)
-
-    const ratio = {}
-
-    if (autoHeight) {
-      if (this.state.aspectRatio) {
-        ratio.aspectRatio = this.state.aspectRatio
-      } else {
-        ratio.aspectRatio = 1
-      }
+      return (
+        <View
+          ref={ this.captureRef }
+          style={[ styles.imageContainer, themeStyle, style ]}
+        >
+          { children }
+        </View>
+      )
     }
 
     return (
-      <View style={ [styles.imageContainer, themeStyle, style, ratio] }
-            ref={ this.captureRef }>
+      <View
+        ref={ this.captureRef }
+        style={[ styles.imageContainer, themeStyle, style, this.computedRatioStyle ]}
+      >
         <Image
           { ...props }
-          style={[ styles.image, imageStyle ]}
-          source={ resolvedSource }
+          onLoadEnd={ onLoadEnd }
           onProgress={ onProgress }
           onLoadStart={ onLoadStart }
-          onLoad={ (autoHeight && !this.state.aspectRatio) ? this.onLoaded : onLoad }
-          onError={ this.onErrorHandled }
-          onLoadEnd={ onLoadEnd }
+          onError={ this.handledError }
+          onLoad={ this.handledLoaded }
+          source={ this.resovledResource }
+          style={[ styles.image, imageStyle ]}
         />
         { children }
       </View>
@@ -143,11 +185,8 @@ export class FastImage extends React.Component<ImageProps, ImageState> {
   }
 
   static priority = {
-    // lower than usual.
     low: 'low',
-    // normal, the default.
     normal: 'normal',
-    // higher than usual.
     high: 'high'
   }
 
@@ -157,9 +196,7 @@ export class FastImage extends React.Component<ImageProps, ImageState> {
 
   static defaultProps = {
     ...ImageDefaultProps,
-    themeStyle: {
-      backgroundColor: '#DCDCDC'
-    },
+    themeStyle: { backgroundColor: '#DCDCDC' },
     imageStyle: {}
   }
 }

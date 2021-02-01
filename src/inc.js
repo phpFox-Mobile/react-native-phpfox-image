@@ -10,13 +10,15 @@ export type ImageProps = {
   onErrorRender?: () => void,
   onLoadEnd?: ()=>void,
   fallback?: ()=>void,
-  autoHeight?: Number,
-  maxRatio?: Number,
-  minRatio?: Number
+  autoHeight?: number,
+  maxRatio?: number,
+  minRatio?: number,
+  aspectRatio?: number
 }
-export type  ImageState = {
-  width: Number,
-  height: Number
+
+export type ImageState = {
+  width: number,
+  height: number
 }
 
 export const ImageDefaultProps = {
