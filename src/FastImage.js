@@ -134,6 +134,9 @@ export class FastImage extends React.Component<ImageProps, ImageState> {
       autoHeight, style = {},
       themeStyle, imageStyle,
       onLoad, onLoadEnd, onLoadStart,
+      // discard this props
+      aspectRatio,
+      // rest
       ...props
     } = this.props
 
@@ -144,7 +147,7 @@ export class FastImage extends React.Component<ImageProps, ImageState> {
     }
 
     const isEmpty = source.uri !== undefined
-      && String(source.uri) == ''
+      && String(source.uri) === ''
 
     if (isEmpty) {
       return (
