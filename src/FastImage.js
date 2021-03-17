@@ -39,6 +39,17 @@ const computeRatioFromPropsAndState = (props, state) => {
   return computedRatio
 }
 
+const isStylesDiff = (style = {}, nextStyle = {}) => {
+  return (
+    style.height !== nextStyle.height ||
+    style.width !== nextStyle.width ||
+    style.borderBottomRightRadius !== nextStyle.borderBottomRightRadius ||
+    style.borderBottomLeftRadius !== nextStyle.borderBottomLeftRadius ||
+    style.borderTopRightRadius !== nextStyle.borderTopRightRadius ||
+    style.borderTopLeftRadius !== nextStyle.borderTopLeftRadius
+  )
+}
+
 export class FastImage extends React.Component<ImageProps, ImageState> {
 
   _root
@@ -76,10 +87,9 @@ export class FastImage extends React.Component<ImageProps, ImageState> {
     const newAspectRatio = computeRatioFromPropsAndState(nextProps, nextState)
 
     const result = (
-      style?.height !== nextStyle.height ||
-      style?.width !== nextStyle.width ||
       source?.uri !== nextSource?.uri ||
       aspectRatio !== newAspectRatio ||
+      isStylesDiff(style, nextStyle) ||
       nextState.error !== error
     )
 
